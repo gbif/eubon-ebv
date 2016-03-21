@@ -17,9 +17,11 @@
 
 </head>
 <body>
+<div id='map' class="map"></div>
 
-<div id='map'></div>
-<div id='features'>
+<div id='features' class='features'>
+    <a href="#map" class="closeFeatures">&#x2715;</a>
+    <div class="logo"></div>
     <h3>Essential Biodiversity Variables (EBVs) for Species Distribution</h3>
     <h4>An explorer to help identify datasets that may be of interest when generating EBVs for species distribution</h4>
     <h5>EU BON LOGO NEEDS to be clearly shown</h5>
@@ -27,17 +29,19 @@
     <p>Todo.... explain EBV, when open data matters, what the explorer is. Link to code</p>
 </div>
 <div class='map-overlay top'>
-<div class='map-overlay-inner'>
-    <fieldset>
-        <label>Year range (<span id="years">1900 - 2016</span>)</label>
-        <label id='month'></label>
-        <div id='slider'/>
-    </fieldset>
+    <div class='map-overlay-inner'>
+        <fieldset>
+            <label>Year range (<span id="years">1900 - 2016</span>)</label>
+            <label id='month'></label>
+            <div id='slider'/>
+        </fieldset>
+    </div>
 </div>
 
 <script>
 mapboxgl.accessToken = 'pk.eyJ1IjoiZ2JpZiIsImEiOiJjaW0xeXU1c3gwMG04dm1tNXB3cjJ3Zm12In0.8A2pUP_lgL19w4G5L0fDNw';
 
+var gb = {};
 var minYear = 1900;
 var maxYear = 2016;
 var datasetLayer = "http://eubon-ebv.gbif.org/{z}/{x}/{y}.pbf";
@@ -134,10 +138,11 @@ function yearsToGBIFParams(minYear, maxYear) {
 var map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/light-v8',
-    center: [40, 55],
-    zoom: 3
+    center: [10, 50],
+    zoom: 3,
+    maxZoom: 8.9
 });
-
+map.addControl(new mapboxgl.Navigation());
 
 map.on('style.load', function () {
     initMap(map, 1900, 2016);
@@ -171,9 +176,10 @@ map.on('click', function (e) {
         $.getJSON(detail, function (data) {
             var ds = $("#dataset-list");
             $.each(data.datasets, function (key, val) {
-                ds.append("<li>" + val.name + "</li>");
+                ds.append("<li onclick='gb.expand(this, \""+val.key+"\");'><h4>" + val.name + "</h4><div class='details'><p class='count'></p><p class='descr'></p><a href='http://www.gbif.org/dataset/"+val.key+"'>Read more on GBIF.org</a></div></li>");
             });
         });
+        location.href = '#features';
     });
 });
 
@@ -252,13 +258,37 @@ slider.noUiSlider.on('change', function (vals) {
         return data ? fn(data) : fn;
     };
 })();
+    
+
+gb.expand = function(el, datasetKey) {
+    $.get( '//api.gbif.org/v1/dataset/' + datasetKey, function(data) {
+        data.description = data.description && data.description.length > 140 ? data.description.substr(0,256) + '...' : data.description;
+        var content = '<p>{{description}}</p>'.replace('{{description}}', data.description ? data.description: 'No description available.');
+        $(el).find('.descr').html(content);
+    }).fail(function() {
+        location.href = 'http://www.gbif.org/dataset/' + datasetKey;
+    });
+    
+    $.get( '//api.gbif.org/v1/occurrence/search?datasetKey=' + datasetKey, function(data) {
+        $(el).toggleClass('isExpanded');
+        $(el).find('.count').html('<span>'+data.count + '</span> total occurrences in dataset.');
+    }).fail(function() {
+        $(el).toggleClass('isExpanded');
+    });
+
+    
+}
 </script>
 
 <!-- The right hand pane template for when a user clicks a cell -->
 <script type="text/html" id="details_tmpl">
+    <a href="#map" class="closeFeatures">&#x2715;</a>
+    <div class="logo logo-small"></div>
     <h3>Datasets</h3>
-    <p><span class="count"><%=count%></span> datasets in this region</p>
-    <p>With data from <%=Math.min(minYear)%>-<%=Math.min(maxYear)%></p>
+    <div class="descr">
+        <p class="count"><span><%=count%></span> datasets in this area</p>
+        <p class="yearRange">With data from <%=Math.min(minYear)%>-<%=Math.min(maxYear)%></p>
+    </div>
     <ul id="dataset-list"></ul>
 </script>
 
