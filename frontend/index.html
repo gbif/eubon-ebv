@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'/>
+    <title></title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no'/>
+
+    <!--script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.15.0/mapbox-gl.js'></script-->
+    <script src="./mapbox-gl_patched_issue2236.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/8.3.0/nouislider.min.js"></script>
+    <script src="https://code.jquery.com/jquery-2.2.1.min.js"
+            integrity="sha256-gvQgAFzTH6trSrAWoH1iPo9Xc96QxSZ3feW6kem+O00=" crossorigin="anonymous"></script>
+
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.15.0/mapbox-gl.css' rel='stylesheet'/>
+    <link href='nouislider.css' rel='stylesheet'/>
+    <link href='style.css' rel='stylesheet'/>
+
+</head>
+<body>
+
+<div id='map'></div>
+<div id='features'>
+    <h3>Essential Biodiversity Variables (EBVs) for Species Distribution</h3>
+    <h4>An explorer to help identify datasets that may be of interest when generating EBVs for species distribution</h4>
+    <h5>EU BON LOGO NEEDS to be clearly shown</h5>
+
+    <p>Todo.... explain EBV, when open data matters, what the explorer is. Link to code</p>
+</div>
+<div class='map-overlay top'>
+<div class='map-overlay-inner'>
+    <fieldset>
+        <label>Year range (<span id="years">1900 - 2016</span>)</label>
+        <label id='month'></label>
+        <div id='slider'/>
+    </fieldset>
+</div>
+
+<script>
+mapboxgl.accessToken = 'pk.eyJ1IjoiZ2JpZiIsImEiOiJjaW0xeXU1c3gwMG04dm1tNXB3cjJ3Zm12In0.8A2pUP_lgL19w4G5L0fDNw';
+
+var minYear = 1900;
+var maxYear = 2016;
+var datasetLayer = "http://eubon-ebv.gbif.org/{z}/{x}/{y}.pbf";
+var datasetDetail = "http://eubon-ebv.gbif.org";
+var occurrenceLayer = "http://api.gbif.org/v1/map/density/tile?x={x}&y={y}&z={z}&palette=reds&resolution=1";
+
+/**
+ * Initialises the map, taking the year slider into consideration.
+ */
+function initMap(map, minYear, maxYear) {
+    // Remove layers if they exist
+    if (map.getSource('datasets')) map.removeSource('datasets');
+    if (map.getSource('occurrence')) map.removeSource('occurrence');
+    if (map.getLayer('coverage')) map.removeLayer('coverage');
+    if (map.getLayer('coverage-hover')) map.removeLayer('coverage-hover');
+    if (map.getLayer('coverage-hover-fill')) map.removeLayer('coverage-hover-fill');
+    if (map.getLayer('occurrence-tiles')) map.removeLayer('occurrence-tiles');
+
+    map.addSource('datasets', {
+        type: 'vector',
+        "tiles": [datasetLayer + "?minYear" + minYear + "&maxYear=" + maxYear]
+    });
+    map.addSource('occurrence', {
+        type: 'raster',
+        "tiles": [occurrenceLayer + "&" + yearsToGBIFParams(minYear, maxYear)],
+        "tileSize": 256
+    });
+
+    // occurrence layer
+    map.addLayer({
+        "id": "occurrence-tiles",
+        "type": "raster",
+        "source": "occurrence"
+    });
+
+    // interactive data for the click grid layer
+    map.addLayer({
+        "id": "coverage",
+        "type": "line",
+        'interactive': true,
+        "source": "datasets",
+        "source-layer": "coverage",
+        "paint": {
+            "line-color": "#7b7b7b",
+            "line-opacity": 0.1,
+            "line-width": 1
+        }
+    });
+
+    // a layer that activates only on a hover over a feature (a cell)
+    map.addLayer({
+        "id": "coverage-hover",
+        "type": "line",
+        "source": "datasets",
+        "source-layer": "coverage",
+        "layout": {},
+        "paint": {
+            "line-color": "#7b7b7b",
+            "line-opacity": 1,
+            "line-width": 3,
+            "line-blur": 10
+        },
+        "filter": ["==", "id", ""]
+    });
+
+    // a layer that activates only on a hover over a feature (a cell)
+    map.addLayer({
+        "id": "coverage-hover-fill",
+        "type": "fill",
+        "source": "datasets",
+        "source-layer": "coverage",
+        "layout": {},
+        "paint": {
+            "fill-color": "#FCA107",
+            "fill-opacity": 0.2
+        },
+        "filter": ["==", "id", ""]
+    });
+}
+
+/**
+ * Takes the year range to build the params needed for the GBIF occurrence layer.
+ */
+function yearsToGBIFParams(minYear, maxYear) {
+    var opts = [];
+    for (var y = Math.min(minYear); y <= Math.min(maxYear); y += 10) {
+        opts.push("layer=SPE_" + y + "_" + (y + 10));
+        opts.push("layer=OBS_" + y + "_" + (y + 10));
+        opts.push("layer=OTH_" + y + "_" + (y + 10));
+    }
+    return opts.join("&");
+}
+
+var map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/light-v8',
+    center: [40, 55],
+    zoom: 3
+});
+
+
+map.on('style.load', function () {
+    initMap(map, 1900, 2016);
+});
+
+
+/**
+ * Set up the details when a user clicks a cell.
+ */
+map.on('click', function (e) {
+
+    map.featuresAt(e.point, {
+        radius: 1,
+        includeGeometry: true,
+        layer: 'coverage'
+    }, function (err, features) {
+
+        if (err || !features.length) {
+            return;
+        }
+
+        var data = {};
+        data.minYear = minYear;
+        data.maxYear = maxYear;
+        data.count = features[0].properties.count;
+
+        document.getElementById("features").innerHTML = tmpl("details_tmpl", data);
+
+        var detail = datasetDetail + "/" + features[0].properties.id + ".json?minYear="
+                + Math.floor(minYear) + "&maxYear=" + Math.floor(maxYear);
+        $.getJSON(detail, function (data) {
+            var ds = $("#dataset-list");
+            $.each(data.datasets, function (key, val) {
+                ds.append("<li>" + val.name + "</li>");
+            });
+        });
+    });
+});
+
+/**
+ *  Create the hover over effects on mouse moving.
+ */
+map.on('mousemove', function (e) {
+    map.featuresAt(e.point, {
+        radius: 0,
+        layer: 'coverage'
+    }, function (err, features) {
+        map.getCanvas().style.cursor = (!err && features.length) ? 'pointer' : '';
+        if (!err && features.length) {
+            map.setFilter("coverage-hover", ["==", "id", features[0].properties.id]);
+            map.setFilter("coverage-hover-fill", ["==", "id", features[0].properties.id]);
+        } else {
+            map.setFilter("coverage-hover", ["==", "id", ""]);
+            map.setFilter("coverage-hover-fill", ["==", "id", ""]);
+        }
+
+    });
+});
+
+
+noUiSlider.create(slider, {
+    start: [1900, 2020],
+    step: 10,
+    connect: true,
+    range: {
+        'min': 1900,
+        'max': 2016 // ok for a pilot project which uses static(!) data
+    }
+});
+slider.noUiSlider.on('update', function (vals) {
+    document.getElementById("years").innerText = Math.floor(vals[0]) + " - " + Math.floor(vals[1]);
+});
+slider.noUiSlider.on('change', function (vals) {
+    minYear = vals[0];
+    maxYear = vals[1];
+    initMap(map, Math.floor(vals[0]), Math.floor(vals[1]));
+});
+
+
+/**
+ * A very simple templating engine
+ */
+(function () {
+    var cache = {};
+
+    this.tmpl = function tmpl(str, data) {
+        // Figure out if we're getting a template, or if we need to
+        // load the template - and be sure to cache the result.
+        var fn = !/\W/.test(str) ?
+                cache[str] = cache[str] ||
+                        tmpl(document.getElementById(str).innerHTML) :
+
+            // Generate a reusable function that will serve as a template
+            // generator (and which will be cached).
+                new Function("obj",
+                        "var p=[],print=function(){p.push.apply(p,arguments);};" +
+
+                            // Introduce the data as local variables using with(){}
+                                "with(obj){p.push('" +
+
+                            // Convert the template into pure JavaScript
+                                str
+                                        .replace(/[\r\t\n]/g, " ")
+                                        .split("<%").join("\t")
+                                        .replace(/((^|%>)[^\t]*)'/g, "$1\r")
+                                        .replace(/\t=(.*?)%>/g, "',$1,'")
+                                        .split("\t").join("');")
+                                        .split("%>").join("p.push('")
+                                        .split("\r").join("\\'")
+                                + "');}return p.join('');");
+
+        return data ? fn(data) : fn;
+    };
+})();
+</script>
+
+<!-- The right hand pane template for when a user clicks a cell -->
+<script type="text/html" id="details_tmpl">
+    <h3>Datasets</h3>
+    <p><span class="count"><%=count%></span> datasets in this region</p>
+    <p>With data from <%=Math.min(minYear)%>-<%=Math.min(maxYear)%></p>
+    <ul id="dataset-list"></ul>
+</script>
+
+
+</body>
+</html>
