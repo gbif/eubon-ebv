@@ -157,7 +157,7 @@ section {
     padding: 1rem;
 }
 .logo {
-    background-image: url('http://test-eubon.ebd.csic.es/image/layout_set_logo?img_id=38313&t=1458570940643');
+    background-image: url('eubonlogo.png');
     height: 100px;
     background-position: center;
     background-size: contain;

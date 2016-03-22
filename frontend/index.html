@@ -44,8 +44,8 @@ mapboxgl.accessToken = 'pk.eyJ1IjoiZ2JpZiIsImEiOiJjaW0xeXU1c3gwMG04dm1tNXB3cjJ3Z
 var gb = {};
 var minYear = 1900;
 var maxYear = 2016;
-var datasetLayer = "http://eubon-ebv.gbif.org/{z}/{x}/{y}.pbf";
-var datasetDetail = "http://eubon-ebv.gbif.org";
+var datasetLayer = "http://eubon-ebv.gbif.org/api/{z}/{x}/{y}.pbf";
+var datasetDetail = "http://eubon-ebv.gbif.org/api";
 var occurrenceLayer = "http://api.gbif.org/v1/map/density/tile?x={x}&y={y}&z={z}&palette=reds&resolution=1";
 
 /**
@@ -264,14 +264,14 @@ gb.expand = function(el, datasetKey) {
     $.get( '//api.gbif.org/v1/dataset/' + datasetKey, function(data) {
         data.description = data.description && data.description.length > 140 ? data.description.substr(0,256) + '...' : data.description;
         var content = '<p>{{description}}</p>'.replace('{{description}}', data.description ? data.description: 'No description available.');
-        $(el).find('.descr').html(content);
-    }).fail(function() {
+        $(el).parent().find('.descr').html(content);
+    }).fail(function(data) {
         location.href = 'http://www.gbif.org/dataset/' + datasetKey;
     });
     
-    $.get( '//api.gbif.org/v1/occurrence/search?datasetKey=' + datasetKey, function(data) {
-        $(el).toggleClass('isExpanded');
-        $(el).find('.count').html('<span>'+data.count + '</span> total occurrences in dataset.');
+    $.get( 'http://api.gbif.org/v1/occurrence/search?datasetKey=' + datasetKey, function(data) {
+        $(el).parent().toggleClass('isExpanded');
+        $(el).parent().find('.count').html('<span>'+data.count + '</span> total occurrences in dataset.');
     }).fail(function() {
         $(el).toggleClass('isExpanded');
     });
