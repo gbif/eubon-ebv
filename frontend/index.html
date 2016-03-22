@@ -176,7 +176,7 @@ map.on('click', function (e) {
         $.getJSON(detail, function (data) {
             var ds = $("#dataset-list");
             $.each(data.datasets, function (key, val) {
-                ds.append("<li onclick='gb.expand(this, \""+val.key+"\");'><h4>" + val.name + "</h4><div class='details'><p class='count'></p><p class='descr'></p><a href='http://www.gbif.org/dataset/"+val.key+"'>Read more on GBIF.org</a></div></li>");
+                ds.append("<li><h4 onclick='gb.expand(this, \""+val.key+"\");'>" + val.name + "</h4><div class='details'><p class='count'></p><p class='descr'></p><a href='http://www.gbif.org/dataset/"+val.key+"' target='_blank'>Read more on GBIF.org</a></div></li>");
             });
         });
         location.href = '#features';
