@@ -4,6 +4,7 @@ import org.gbif.eubon.ebv.data.DataDAO;
 import org.gbif.eubon.ebv.resource.TileResource;
 
 import io.dropwizard.Application;
+import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.jdbi.DBIFactory;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
@@ -27,6 +28,7 @@ public class TileServerApplication extends Application<TileServerConfiguration> 
 
   @Override
   public final void initialize(Bootstrap<TileServerConfiguration> bootstrap) {
+    bootstrap.addBundle(new AssetsBundle("/assets", "/", "index.html", "assets"));
   }
 
   @Override
@@ -36,5 +38,7 @@ public class TileServerApplication extends Application<TileServerConfiguration> 
     final DBI jdbi = factory.build(environment, configuration.getDataSourceFactory(), "MySQL");
     final DataDAO dataDao = jdbi.onDemand(DataDAO.class);
     environment.jersey().register(new TileResource(dataDao));
+    //environment.jersey().setUrlPattern("/api/*");
+
   }
 }

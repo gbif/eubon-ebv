@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset='utf-8'/>
-    <title></title>
+    <title>EUBON EBV</title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no'/>
 
     <!--script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.15.0/mapbox-gl.js'></script-->
@@ -22,11 +22,12 @@
 <div id='features' class='features'>
     <a href="#map" class="closeFeatures">&#x2715;</a>
     <div class="logo"></div>
-    <h3>Essential Biodiversity Variables (EBVs) for Species Distribution</h3>
-    <h4>An explorer to help identify datasets that may be of interest when generating EBVs for species distribution</h4>
-    <h5>EU BON LOGO NEEDS to be clearly shown</h5>
-
-    <p>Todo.... explain EBV, when open data matters, what the explorer is. Link to code</p>
+    <h3>Discover datasets of interest for Essential Biodiversity Variables (EBVs)</h3>
+    <h4>An explorer to help identify and access datasets of interest when generating EBVs for species distribution and population abundance.</h4>
+    <p>The <a target="_blank" href="http://geobon.org/essential-biodiversity-variables/what-are-ebvs/">Group on Earth Observations - Biodiversity Observation Network (GEO BON)</a> is working towards the implementation and progression of Essential Biodiversity Variables (EBVs)
+    that could serve as the foundation for interoperable sub-national, national, regional and global monitoring initiatives.
+    This explorer aims to provide a mechanism that helps communities developing EBVs discover data that is freely and openly available today,
+    and has been connected through the work of the EU BON partner organisations.</p>
 </div>
 <div class='map-overlay top'>
     <div class='map-overlay-inner'>
@@ -258,7 +259,7 @@ slider.noUiSlider.on('change', function (vals) {
         return data ? fn(data) : fn;
     };
 })();
-    
+
 
 gb.expand = function(el, datasetKey) {
     $.get( '//api.gbif.org/v1/dataset/' + datasetKey, function(data) {
@@ -268,15 +269,13 @@ gb.expand = function(el, datasetKey) {
     }).fail(function(data) {
         location.href = 'http://www.gbif.org/dataset/' + datasetKey;
     });
-    
+
     $.get( 'http://api.gbif.org/v1/occurrence/search?datasetKey=' + datasetKey, function(data) {
         $(el).parent().toggleClass('isExpanded');
         $(el).parent().find('.count').html('<span>'+data.count + '</span> total occurrences in dataset.');
     }).fail(function() {
         $(el).toggleClass('isExpanded');
     });
-
-    
 }
 </script>
 
