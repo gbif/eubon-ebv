@@ -131,7 +131,7 @@ body {
     display: block;
     color: inherit;
 }
-.features li:hover {
+.features li h4:hover {
     background: #f1f1f1;
     cursor: pointer;
 }
