@@ -19,7 +19,7 @@
 <body>
 <div id='map' class="map"></div>
 
-<div id='features' class='features'>
+<div class='features features-about'>
     <a href="#map" class="closeFeatures">&#x2715;</a>
     <div class="logo"></div>
     <h3>Discover datasets of interest for Essential Biodiversity Variables (EBVs)</h3>
@@ -29,6 +29,9 @@
     This explorer aims to provide a mechanism that helps communities developing EBVs discover data that is freely and openly available today,
     and has been connected through the work of the EU BON partner organisations.</p>
 </div>
+<div id="features" class="features features-datasets">
+</div>
+
 <div class='map-overlay top'>
     <div class='map-overlay-inner'>
         <fieldset>
@@ -180,6 +183,7 @@ map.on('click', function (e) {
                 ds.append("<li><h4 onclick='gb.expand(this, \""+val.key+"\");'>" + val.name + "</h4><div class='details'><p class='count'></p><p class='descr'></p><a href='http://www.gbif.org/dataset/"+val.key+"' target='_blank'>Read more on GBIF.org</a></div></li>");
             });
         });
+        $('#features').show();
         location.href = '#features';
     });
 });
@@ -262,7 +266,7 @@ slider.noUiSlider.on('change', function (vals) {
 
 
 gb.expand = function(el, datasetKey) {
-    $.get( '//api.gbif.org/v1/dataset/' + datasetKey, function(data) {
+    $.get( 'http://api.gbif.org/v1/dataset/' + datasetKey, function(data) {
         data.description = data.description && data.description.length > 140 ? data.description.substr(0,256) + '...' : data.description;
         var content = '<p>{{description}}</p>'.replace('{{description}}', data.description ? data.description: 'No description available.');
         $(el).parent().find('.descr').html(content);
@@ -277,11 +281,16 @@ gb.expand = function(el, datasetKey) {
         $(el).toggleClass('isExpanded');
     });
 }
+
+function closeDatasets() {
+    $('#features').hide();
+}
+closeDatasets();
 </script>
 
 <!-- The right hand pane template for when a user clicks a cell -->
 <script type="text/html" id="details_tmpl">
-    <a href="#map" class="closeFeatures">&#x2715;</a>
+    <a href="#features" class="closeFeatures" onclick="closeDatasets(this)">&#x2715;</a>
     <div class="logo logo-small"></div>
     <div class="descr">
         <p class="count"><span><%=count%></span> datasets in this area</p>

@@ -8,7 +8,7 @@ body { margin:0; padding:0; font-family: 'Helvetica Neue', Helvetica, Arial, san
     bottom: 0;
     left: calc( (100% - 900px)/2 );
     width: 400px;
-    max-width 90%;
+    max-width: 90%;
     display: block;
     -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
     -moz-box-sizing: border-box;    /* Firefox, other Gecko */
@@ -132,7 +132,7 @@ body {
     color: inherit;
 }
 .features li h4:hover {
-    background: #f1f1f1;
+    background: #E2E2E2;
     cursor: pointer;
 }
 
@@ -156,6 +156,12 @@ section {
     text-decoration: none;
     padding: 1rem;
 }
+.features-datasets {
+    display: none;
+}
+.features-datasets .closeFeatures {
+    display: block;
+}
 .logo {
     background-image: url('eubonlogo.png');
     height: 100px;
@@ -174,14 +180,14 @@ section {
 }
 
 @media screen and (max-width: 801px) {
-    #features {
+    .features {
         display: none;
         padding: 20px;
     }
-    #features:target {
+    .features:target {
         display: block;
     }
-    #features:target+.map-overlay {
+    .features:target+.map-overlay {
         display: none;
     }
     .closeFeatures {

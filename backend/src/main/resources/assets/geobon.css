@@ -1,0 +1,39 @@
+body {
+    font-weight: normal;
+    font-family: Lato, sans-serif;
+}
+.logo {
+    background-image: url('geobon.jpg');
+    height: 50px;
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.features {
+    font-family: Lato, sans-serif;
+    font-size: 16px;
+    color: #fff;
+    background-color: #111111;
+}
+
+.features-about a {
+    color: #008b7a;
+}
+.closeFeatures {
+    color: white;
+}
+.features li h4:hover {
+    background: #272727;
+    cursor: pointer;
+}
+.features li.isExpanded h4 {
+    background: #008b7a;
+    color: #fff;
+}
+.features li .details {
+    background: #272727;
+}
+.features li .details>a {
+    color: inherit;
+}
