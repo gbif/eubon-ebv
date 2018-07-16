@@ -47,10 +47,10 @@
 
     var gb = {};
     var minYear = 1900;
-    var maxYear = 2016;
     var datasetLayer = "http://eubon-ebv.gbif.org/api/{z}/{x}/{y}.pbf";
     var datasetDetail = "http://eubon-ebv.gbif.org/api";
-    var occurrenceLayer = "http://api.gbif.org/v1/map/density/tile?x={x}&y={y}&z={z}&palette=oranges&resolution=1";
+    var maxYear = (new Date()).getFullYear();
+    var occurrenceLayer = "https://api.gbif.org/v1/map/density/tile?x={x}&y={y}&z={z}&palette=oranges&resolution=1";
 
     /**
      * Initialises the map, taking the year slider into consideration.
@@ -149,7 +149,7 @@
     map.addControl(new mapboxgl.Navigation());
 
     map.on('style.load', function () {
-        initMap(map, 1900, 2016);
+        initMap(map, 1900, (new Date()).getFullYear());
     });
 
 
@@ -180,7 +180,7 @@
             $.getJSON(detail, function (data) {
                 var ds = $("#dataset-list");
                 $.each(data.datasets, function (key, val) {
-                    ds.append("<li><h4 onclick='gb.expand(this, \""+val.key+"\");'>" + val.name + "</h4><div class='details'><p class='count'></p><p class='descr'></p><a href='http://www.gbif.org/dataset/"+val.key+"' target='_blank'>Read more on GBIF.org</a></div></li>");
+                    ds.append("<li><h4 onclick='gb.expand(this, \""+val.key+"\");'>" + val.name + "</h4><div class='details'><p class='count'></p><p class='descr'></p><a href='https://www.gbif.org/dataset/"+val.key+"' target='_blank'>Read more on GBIF.org</a></div></li>");
                 });
             });
             $('#features').show();
@@ -215,7 +215,7 @@
         connect: true,
         range: {
             'min': 1900,
-            'max': 2016 // ok for a pilot project which uses static(!) data
+            'max': (new Date()).getFullYear()
         }
     });
     slider.noUiSlider.on('update', function (vals) {
@@ -266,15 +266,15 @@
 
 
     gb.expand = function(el, datasetKey) {
-        $.get( 'http://api.gbif.org/v1/dataset/' + datasetKey, function(data) {
+        $.get( 'https://api.gbif.org/v1/dataset/' + datasetKey, function(data) {
             data.description = data.description && data.description.length > 140 ? data.description.substr(0,256) + '...' : data.description;
             var content = '<p>{{description}}</p>'.replace('{{description}}', data.description ? data.description: 'No description available.');
             $(el).parent().find('.descr').html(content);
         }).fail(function(data) {
-            location.href = 'http://www.gbif.org/dataset/' + datasetKey;
+            location.href = 'https://www.gbif.org/dataset/' + datasetKey;
         });
 
-        $.get( 'http://api.gbif.org/v1/occurrence/search?datasetKey=' + datasetKey, function(data) {
+        $.get( 'https://api.gbif.org/v1/occurrence/search?datasetKey=' + datasetKey, function(data) {
             $(el).parent().toggleClass('isExpanded');
             $(el).parent().find('.count').html('<span>'+data.count + '</span> total occurrences in dataset.');
         }).fail(function() {

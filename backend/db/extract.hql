@@ -3,19 +3,20 @@
 -- Requires that the Hive UDF is built and registered.
 --
 
+CREATE TEMPORARY FUNCTION tile AS 'org.gbif.eubon.udf.TileUtilsUdf';
+
 --
 --  Improve performance by creating a temp table
 --
 CREATE TABLE eubon.source AS SELECT
   decimalLatitude, decimalLongitude, year, datasetKey
-FROM uat.occurrence_hdfs
+FROM prod_f.occurrence_hdfs
 WHERE
   decimalLatitude IS NOT NULL AND decimalLatitude BETWEEN -85 AND 85 AND
   decimalLongitude IS NOT NULL AND decimalLongitude BETWEEN -180 AND 180 AND
   hasGeospatialIssues = false AND
   year IS NOT NULL AND year >= 1900 AND
   basisOfRecord != "FOSSIL_SPECIMEN" AND basisOfRecord != "LIVING_SPECIMEN";
-
 
 SET hive.exec.parallel = true;
 

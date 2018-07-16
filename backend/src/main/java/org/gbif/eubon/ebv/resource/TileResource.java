@@ -57,7 +57,7 @@ public final class TileResource {
   ) {
 
     int minYearAsInt = minYear == null ? 1900 : minYear;
-    int maxYearAsInt = maxYear == null ? 2020 : maxYear; // if this runs longer than 2020, it'd be a mirable
+    int maxYearAsInt = maxYear == null ? 2020 : maxYear; // if this runs longer than 2020, it'd be a miracle
 
     long start = System.currentTimeMillis();
     List<GridCount> cells = dataDao.lookup(z, x, y, minYearAsInt, maxYearAsInt);
@@ -65,7 +65,7 @@ public final class TileResource {
               cells.size(), (System.currentTimeMillis() - start));
 
     // open the tiles to the world (especially your friendly localhost developer!)
-    response.addHeader("Allow-Control-Allow-Methods", "GET,OPTIONS");
+    response.addHeader("Allow-Control-Allow-Methods", "HEAD,GET,OPTIONS");
     response.addHeader("Access-Control-Allow-Origin", "*");
 
     start = System.currentTimeMillis();
@@ -148,7 +148,7 @@ public final class TileResource {
              (System.currentTimeMillis() - start));
 
     // open the tiles to the world (especially your friendly localhost developer!)
-    response.addHeader("Allow-Control-Allow-Methods", "GET,OPTIONS");
+    response.addHeader("Allow-Control-Allow-Methods", "HEAD,GET,OPTIONS");
     response.addHeader("Access-Control-Allow-Origin", "*");
 
     StringBuffer json = new StringBuffer("{\"datasets\":[");

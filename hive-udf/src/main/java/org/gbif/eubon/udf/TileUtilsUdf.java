@@ -102,7 +102,7 @@ public class TileUtilsUdf extends GenericUDF {
   }
 
   /**
-   * Google maps cover +/- 85 degrees only.
+   * Google maps cover ±85 degrees only.
    * @return true if the location is plottable on a map
    */
   static boolean isPlottable(Double lat, Double lng) {

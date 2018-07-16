@@ -20,7 +20,7 @@ public interface DataDAO {
   @SqlQuery("SELECT t.dataset_key, title AS name "
             + "FROM tiles t JOIN datasets d ON t.dataset_key=d.dataset_key "
             + "WHERE x=:x AND y=:y AND z=:z AND x1=:x1 AND y1=:y1 AND year BETWEEN :minYear AND :maxYear "
-            + "GROUP BY dataset_key, name "
+            + "GROUP BY t.dataset_key, name "
             + "ORDER BY name")
   List<DatasetName> datasets(
     @Bind("z") int z, @Bind("x") int x, @Bind("y") int y, @Bind("x1") int x1,
